@@ -6,13 +6,38 @@ from django.utils import timezone
 from django.views.generic import CreateView, UpdateView, DeleteView
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from django.urls import reverse_lazy
+from django.db.models import Q
+from datetime import datetime
 
 
 # Create your views here.
 
 def event_list(request):
     events = Event.objects.filter(date__gte=timezone.now()).order_by('date')
-    return render(request, 'events/event_list.html', {'events': events})
+
+    query = request.GET.get('q')
+    event_type = request.GET.get('type')
+    date = request.GET.get('date')
+
+    if query:
+        events = events.filter(title__icontains=query)
+
+    if event_type:
+        events = events.filter(event_type=event_type)
+
+    if date:
+        try:
+            parsed_date = datetime.strptime(date, "%Y-%m-%d")
+            events = events.filter(date__date=parsed_date.date())
+        except ValueError:
+            pass  # Ignore invalid date input
+
+    return render(request, 'events/event_list.html', {
+        'events': events,
+        'query': query or '',
+        'selected_type': event_type or '',
+        'selected_date': date or '',
+    })
 
 def event_detail(request, pk):
     event = get_object_or_404(Event, pk=pk)

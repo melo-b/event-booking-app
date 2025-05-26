@@ -5,6 +5,23 @@
 {% extends "base.html" %}
 {% block content %}
   <h2>Upcoming Events</h2>
+
+  <form method="get">
+    <input type="text" name="q" placeholder="Search by title" value="{{ query }}">
+    
+    <select name="type">
+      <option value="">All Types</option>
+      <option value="Conference" {% if selected_type == "Conference" %}selected{% endif %}>Conference</option>
+      <option value="Meetup" {% if selected_type == "Meetup" %}selected{% endif %}>Meetup</option>
+      <option value="Workshop" {% if selected_type == "Workshop" %}selected{% endif %}>Workshop</option>
+    </select>
+
+    <input type="date" name="date" value="{{ selected_date }}">
+    <button type="submit">Filter</button>
+  </form>
+
+  <p><a href="{% url 'event_create' %}">+ Create New Event</a></p>
+
   <ul>
     {% for event in events %}
       <li>
@@ -12,7 +29,7 @@
         ({{ event.date|date:"M d, Y H:i" }})
       </li>
     {% empty %}
-      <li>No upcoming events.</li>
+      <li>No matching events.</li>
     {% endfor %}
   </ul>
 {% endblock %}
