@@ -9,6 +9,7 @@ from django.urls import reverse_lazy
 from django.db.models import Q
 from datetime import datetime
 from django.core.exceptions import ValidationError
+from django.contrib.auth.forms import UserCreationForm
 
 
 # Create your views here.
@@ -43,6 +44,17 @@ def event_list(request):
 def event_detail(request, pk):
     event = get_object_or_404(Event, pk=pk)
     return render(request, 'events/event_detail.html', {'event': event})
+
+
+def register(request):
+    if request.method == 'POST':
+        form = UserCreationForm(request.POST)
+        if form.is_valid():
+            form.save()
+            return redirect('login')  # After successful registration
+    else:
+        form = UserCreationForm()
+    return render(request, 'registration/register.html', {'form': form})
 
 @login_required
 def rsvp_event(request, pk):
