@@ -8,6 +8,7 @@ from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from django.urls import reverse_lazy
 from django.db.models import Q
 from datetime import datetime
+from django.core.exceptions import ValidationError
 
 
 # Create your views here.
@@ -47,13 +48,19 @@ def event_detail(request, pk):
 def rsvp_event(request, pk):
     event = get_object_or_404(Event, pk=pk)
 
-    if event.rsvp_set.filter(user=request.user).exists():
-        messages.warning(request, "You have already RSVP’d to this event.")
-    elif event.rsvp_set.count() >= event.capacity:
+    if request.user in event.attendees.all():
+        messages.info(request, "You've already RSVPed to this event.")
+    elif event.is_full():
         messages.error(request, "Sorry, this event is full.")
     else:
-        RSVP.objects.create(user=request.user, event=event)
-        messages.success(request, "RSVP successful!")
+        event.attendees.add(request.user)
+        try:
+            event.full_clean()  # Triggers model validation
+        except ValidationError as e:
+            event.attendees.remove(request.user)
+            messages.error(request, str(e))
+        else:
+            messages.success(request, "You have successfully RSVPed!")
 
     return redirect('event_detail', pk=pk)
 

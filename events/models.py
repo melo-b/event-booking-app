@@ -1,6 +1,7 @@
 from django.db import models
 from django.contrib.auth.models import User
 from django.utils import timezone
+from django.core.exceptions import ValidationError
 
 # Create your models here.
 
@@ -22,11 +23,19 @@ class Event(models.Model):
     creator = models.ForeignKey(User, on_delete=models.CASCADE, related_name='created_events')
     attendees = models.ManyToManyField(User, through='RSVP', related_name='events_attending')
 
+    def is_full(self):
+        return self.attendees.count() >= self.capacity
+    
+    def clean(self):
+        if self.pk and self.attendees.count() > self.capacity:
+            raise ValidationError("This event is already full.")
+    
     def __str__(self):
         return f"{self.title} on {self.date.strftime('%Y-%m-%d')}"
 
     def available_slots(self):
         return self.capacity - self.rsvp_set.count()
+
 
 
 class RSVP(models.Model):
