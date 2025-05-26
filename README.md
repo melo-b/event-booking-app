@@ -32,13 +32,52 @@ _(Add screenshots here later if you'd like)_
 
 ---
 
-## ⚙️ Getting Started
+## ⚙️ Getting Started (to see steps with code, to the last section at the bottom)
 
-### 1. Clone the repo
+### 1. Clone the repo 
+### 2. Create virtual environment
+### 3. Install dependencies
+### 4. Run migrations
+### 5. Create superuser
+### 6. Start development server
 
+
+## Testing the app
+Visit http://127.0.0.1:8000/
+
+Register or log in as a user
+
+Create and RSVP to events
+
+Try filtering, searching, and capacity limits
+
+## Admin Panel
+Visit: http://127.0.0.1:8000/admin/
+
+Log in using your superuser account
+
+Manage events and attendees
+
+## Folder Structure
+event-booking-app/
+│
+├── events/              # App with models, views, URLs
+├── templates/           # HTML templates
+├── static/              # Static files (optional)
+├── eventbooking/        # Project settings and URLs
+├── manage.py            # Django entry point
+├── requirements.txt     # Dependencies
+├── README.md            # Project documentation
+└── .gitignore           # Git ignored files
+
+## Contributing
+Contributions are welcomed! Fork the repo, make your changes, and submit a pull request.
+
+
+### Steps 1 to 6 See here
 ```bash
-git clone https://github.com/your-username/event-booking-app.git
-cd event-booking-app
+### git clone https://github.com/your-username/event-booking-app.git
+### cd event-booking-app
 
 
 ### 2. Create virtual environment
@@ -60,35 +99,4 @@ python manage.py createsuperuser
 
 ### 6. Start development server
 python manage.py runserver
-
-
-## Testing the App
-Visit http://127.0.0.1:8000/
-
-Register/login as a user
-
-Create and RSVP to events
-
-Try filtering, searching, and capacity limits
-
-## Admin Panel
-Access at: http://127.0.0.1:8000/admin/
-
-Login with your superuser account to manage events and attendees.
-
-## Folder Structure
-event-booking-app/
-│
-├── events/              # App with models, views, URLs
-├── templates/           # HTML templates
-├── static/              # Static files (optional)
-├── eventbooking/        # Project settings and URLs
-├── manage.py
-├── requirements.txt     # Generated via pip freeze
-└── README.md
-
-
-## Contributing
-
-Contributions are welcomed! Fork the repo, make changes, and submit a pull request.
 
