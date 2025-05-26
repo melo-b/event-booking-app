@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+{% block content %}
+  <h2>{{ event.title }}</h2>
+  <p><strong>Date:</strong> {{ event.date }}</p>
+  <p><strong>Location:</strong> {{ event.location }}</p>
+  <p><strong>Type:</strong> {{ event.event_type }}</p>
+  <p>{{ event.description }}</p>
+  <p><strong>RSVPs:</strong> {{ event.rsvp_set.count }}/{{ event.capacity }}</p>
+
+  {% if user.is_authenticated %}
+    <form action="{% url 'rsvp_event' event.pk %}" method="post">
+      {% csrf_token %}
+      <button type="submit">RSVP</button>
+    </form>
+  {% else %}
+    <p><a href="{% url 'login' %}?next={{ request.path }}">Log in to RSVP</a></p>
+  {% endif %}
+{% endblock %}
