@@ -1,0 +1,33 @@
+# Python
+__pycache__/
+*.py[cod]
+
+# Virtual environment
+venv/
+ENV/
+env/
+.venv/
+
+# Django stuff
+*.log
+db.sqlite3
+*.sqlite3
+
+# VSCode
+.vscode/
+
+
+# macOS
+.DS_Store
+
+# Windows
+Thumbs.db
+
+# Pip environment files
+*.log
+
+# Environment variables / secret keys
+.env
+
+# Pytest cache
+.pytest_cache/
