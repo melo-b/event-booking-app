@@ -3,6 +3,10 @@ from .models import Event, RSVP
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.utils import timezone
+from django.views.generic import CreateView, UpdateView, DeleteView
+from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
+from django.urls import reverse_lazy
+
 
 # Create your views here.
 
@@ -27,3 +31,37 @@ def rsvp_event(request, pk):
         messages.success(request, "RSVP successful!")
 
     return redirect('event_detail', pk=pk)
+
+
+class EventCreateView(LoginRequiredMixin, CreateView):
+    model = Event
+    fields = ['title', 'description', 'event_type', 'date', 'location', 'capacity']
+    template_name = 'events/event_form.html'
+
+    def form_valid(self, form):
+        form.instance.creator = self.request.user
+        return super().form_valid(form)
+
+
+class EventUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
+    model = Event
+    fields = ['title', 'description', 'event_type', 'date', 'location', 'capacity']
+    template_name = 'events/event_form.html'
+
+    def form_valid(self, form):
+        return super().form_valid(form)
+
+    def test_func(self):
+        event = self.get_object()
+        return self.request.user == event.creator
+
+
+class EventDeleteView(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
+    model = Event
+    success_url = reverse_lazy('event_list')
+    template_name = 'events/event_confirm_delete.html'
+
+    def test_func(self):
+        event = self.get_object()
+        return self.request.user == event.creator
+
