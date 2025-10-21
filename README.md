@@ -6,13 +6,18 @@ A Django-based web application that allows users to create events and RSVP to th
 
 ## 🚀 Features
 
-- ✅ User authentication (login, logout)
+- ✅ User authentication (login, logout, registration)
 - ✅ Create, edit, delete events (CRUD)
-- ✅ RSVP to events (many-to-many relationships)
+- ✅ RSVP to events with cancellation support
 - ✅ Prevent overbooking (model-level validation)
 - ✅ Search & filter by title, event type, and date
+- ✅ Pagination for event listings
 - ✅ Django admin customization
-- ✅ Signals for RSVP confirmation
+- ✅ Email notifications for RSVPs (simulated)
+- ✅ Error handling with custom 404/500 pages
+- ✅ Responsive CSS styling
+- ✅ Comprehensive test coverage
+- ✅ Environment variable configuration
 - 🚫 Deployment not included in this version
 
 ---
@@ -20,9 +25,10 @@ A Django-based web application that allows users to create events and RSVP to th
 ## 🔧 Tech Stack
 
 - Python 3.x
-- Django 4.x
+- Django 5.2.1
 - SQLite (default, can be swapped)
-- Bootstrap (CDN)
+- HTML/CSS with custom styling
+- Python-decouple for environment variables
 
 ---
 
@@ -58,13 +64,23 @@ Log in using your superuser account
 
 Manage events and attendees
 
+## Running Tests
+```bash
+python manage.py test
+```
+
+The test suite includes:
+- Model tests (Event, RSVP, UserProfile)
+- View tests (CRUD operations, permissions, search/filtering)
+- Authentication tests
+- Capacity and RSVP functionality tests
+
 ## Folder Structure
 event-booking-app/
 │
 ├── events/              # App with models, views, URLs
 ├── templates/           # HTML templates
-├── static/              # Static files (optional)
-├── eventbooking/        # Project settings and URLs
+├── config/              # Project settings and URLs
 ├── manage.py            # Django entry point
 ├── requirements.txt     # Dependencies
 ├── README.md            # Project documentation

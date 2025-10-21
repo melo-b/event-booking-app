@@ -1,25 +1,38 @@
 {% extends "base.html" %}
 {% block content %}
-  <h2>{{ event.title }}</h2>
-  <p><strong>Date:</strong> {{ event.date }}</p>
-  <p><strong>Location:</strong> {{ event.location }}</p>
-  <p><strong>Type:</strong> {{ event.event_type }}</p>
-  <p>{{ event.description }}</p>
-  <p><strong>RSVPs:</strong> {{ event.rsvp_set.count }}/{{ event.capacity }}</p>
+  <div class="event-details">
+    <h2>{{ event.title }}</h2>
+    <p><strong>Date:</strong> {{ event.date|date:"M d, Y H:i" }}</p>
+    <p><strong>Location:</strong> {{ event.location }}</p>
+    <p><strong>Type:</strong> {{ event.event_type }}</p>
+    <p><strong>Description:</strong><br>{{ event.description }}</p>
+    <p><strong>RSVPs:</strong> {{ event.rsvp_set.count }}/{{ event.capacity }}</p>
+  </div>
 
   {% if user.is_authenticated %}
-    <form action="{% url 'rsvp_event' event.pk %}" method="post">
-      {% csrf_token %}
-      <button type="submit">RSVP</button>
-    </form>
+    {% if user in event.attendees.all %}
+      <form action="{% url 'cancel_rsvp' event.pk %}" method="post" style="display: inline;">
+        {% csrf_token %}
+        <button type="submit" class="btn btn-danger">Cancel RSVP</button>
+      </form>
+    {% else %}
+      {% if not event.is_full %}
+        <form action="{% url 'rsvp_event' event.pk %}" method="post" style="display: inline;">
+          {% csrf_token %}
+          <button type="submit" class="btn btn-success">RSVP</button>
+        </form>
+      {% else %}
+        <p><strong>Event is full</strong></p>
+      {% endif %}
+    {% endif %}
   {% else %}
-    <p><a href="{% url 'login' %}?next={{ request.path }}">Log in to RSVP</a></p>
+    <p><a href="{% url 'login' %}?next={{ request.path }}" class="btn">Log in to RSVP</a></p>
+  {% endif %}
+
+  {% if user == event.creator %}
+    <p>
+      <a href="{% url 'event_edit' event.pk %}" class="btn">Edit</a>
+      <a href="{% url 'event_delete' event.pk %}" class="btn btn-danger">Delete</a>
+    </p>
   {% endif %}
 {% endblock %}
-
-{% if user == event.creator %}
-  <p>
-    <a href="{% url 'event_edit' event.pk %}">Edit</a> |
-    <a href="{% url 'event_delete' event.pk %}">Delete</a>
-  </p>
-{% endif %}

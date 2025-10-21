@@ -1,36 +1,60 @@
 {% extends "base.html" %}
 
-{% if user.is_authenticated %}
-  <p><a href="{% url 'event_create' %}">+ Create New Event</a></p>
-{% endif %}
-
 {% block content %}
   <h2>Upcoming Events</h2>
 
-  <form method="get">
-    <input type="text" name="q" placeholder="Search by title" value="{{ query }}">
-    
-    <select name="type">
-      <option value="">All Types</option>
-      <option value="Conference" {% if selected_type == "Conference" %}selected{% endif %}>Conference</option>
-      <option value="Meetup" {% if selected_type == "Meetup" %}selected{% endif %}>Meetup</option>
-      <option value="Workshop" {% if selected_type == "Workshop" %}selected{% endif %}>Workshop</option>
-    </select>
+  {% if user.is_authenticated %}
+    <p><a href="{% url 'event_create' %}" class="btn">+ Create New Event</a></p>
+  {% endif %}
 
-    <input type="date" name="date" value="{{ selected_date }}">
-    <button type="submit">Filter</button>
-  </form>
+  <div class="search-form">
+    <form method="get">
+      <div class="form-group">
+        <input type="text" name="q" placeholder="Search by title" value="{{ query }}">
+      </div>
+      
+      <div class="form-group">
+        <select name="type">
+          <option value="">All Types</option>
+          <option value="Conference" {% if selected_type == "Conference" %}selected{% endif %}>Conference</option>
+          <option value="Meetup" {% if selected_type == "Meetup" %}selected{% endif %}>Meetup</option>
+          <option value="Workshop" {% if selected_type == "Workshop" %}selected{% endif %}>Workshop</option>
+        </select>
+      </div>
 
-  <p><a href="{% url 'event_create' %}">+ Create New Event</a></p>
+      <div class="form-group">
+        <input type="date" name="date" value="{{ selected_date }}">
+      </div>
+      
+      <button type="submit" class="btn">Filter</button>
+    </form>
+  </div>
 
-  <ul>
+  <ul class="event-list">
     {% for event in events %}
       <li>
         <a href="{% url 'event_detail' event.pk %}">{{ event.title }}</a>
-        ({{ event.date|date:"M d, Y H:i" }})
+        <br>
+        <small>{{ event.date|date:"M d, Y H:i" }} | {{ event.location }} | {{ event.event_type }}</small>
       </li>
     {% empty %}
       <li>No matching events.</li>
     {% endfor %}
   </ul>
+
+  {% if events.has_other_pages %}
+    <div class="pagination">
+      {% if events.has_previous %}
+        <a href="?page={{ events.previous_page_number }}{% if query %}&q={{ query }}{% endif %}{% if selected_type %}&type={{ selected_type }}{% endif %}{% if selected_date %}&date={{ selected_date }}{% endif %}">← Previous</a>
+      {% endif %}
+      
+      <span class="current">
+        Page {{ events.number }} of {{ events.paginator.num_pages }}
+      </span>
+      
+      {% if events.has_next %}
+        <a href="?page={{ events.next_page_number }}{% if query %}&q={{ query }}{% endif %}{% if selected_type %}&type={{ selected_type }}{% endif %}{% if selected_date %}&date={{ selected_date }}{% endif %}">Next →</a>
+      {% endif %}
+    </div>
+  {% endif %}
 {% endblock %}

@@ -1,22 +1,35 @@
+{% load static %}
 <!DOCTYPE html>
 <html>
 <head>
     <title>Event Booking</title>
+    <link rel="stylesheet" type="text/css" href="{% static 'css/style.css' %}">
 </head>
 <body>
-  {% if user.is_authenticated %}
-    <p>Welcome, {{ user.username }} | <a href="{% url 'logout' %}">Logout</a></p>
-  {% else %}
-    <p><a href="{% url 'login' %}">Login</a></p>
-  {% endif %}
-  <hr>
-  {% if messages %}
-    <ul>
-      {% for message in messages %}
-        <li>{{ message }}</li>
-      {% endfor %}
-    </ul>
-  {% endif %}
-  {% block content %}{% endblock %}
+    <div class="container">
+        <div class="nav">
+            <h1>Event Booking App</h1>
+            {% if user.is_authenticated %}
+                <p>Welcome, {{ user.username }} | 
+                <form action="{% url 'logout' %}" method="post" style="display: inline;">
+                    {% csrf_token %}
+                    <button type="submit" class="logout-btn">Logout</button>
+                </form>
+                </p>
+            {% else %}
+                <p><a href="{% url 'login' %}">Login</a> | <a href="{% url 'register' %}">Register</a></p>
+            {% endif %}
+        </div>
+        
+        {% if messages %}
+            <ul class="messages">
+                {% for message in messages %}
+                    <li class="{{ message.tags }}">{{ message }}</li>
+                {% endfor %}
+            </ul>
+        {% endif %}
+        
+        {% block content %}{% endblock %}
+    </div>
 </body>
 </html>

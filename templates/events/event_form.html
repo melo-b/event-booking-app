@@ -3,7 +3,15 @@
   <h2>{% if object %}Edit{% else %}Create{% endif %} Event</h2>
   <form method="post">
     {% csrf_token %}
-    {{ form.as_p }}
-    <button type="submit">{% if object %}Update{% else %}Create{% endif %}</button>
+    {% for field in form %}
+      <div class="form-group">
+        <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+        {{ field }}
+        {% if field.errors %}
+          <div class="error">{{ field.errors }}</div>
+        {% endif %}
+      </div>
+    {% endfor %}
+    <button type="submit" class="btn">{% if object %}Update{% else %}Create{% endif %}</button>
   </form>
 {% endblock %}
