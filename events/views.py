@@ -11,6 +11,7 @@ from django.core.exceptions import ValidationError
 from django.contrib.auth.forms import UserCreationForm
 from django.http import Http404
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
+from django.db import transaction
 import logging
 
 logger = logging.getLogger(__name__)
@@ -100,30 +101,46 @@ def register(request):
 
 @login_required
 def rsvp_event(request, pk):
-    """Handle RSVP to an event."""
+    """Handle RSVP to an event with concurrency protection."""
     try:
-        event = get_object_or_404(Event, pk=pk)
+        # 1. Start the atomic transaction block
+        with transaction.atomic():
+            
+            # 2. Lock the specific event row. 
+            # No other request can read/write this event until this block finishes.
+            # We use get() instead of get_object_or_404 because we are inside a try block
+            event = Event.objects.select_for_update().get(pk=pk)
 
-        if request.user in event.attendees.all():
-            messages.info(request, "You've already RSVPed to this event.")
-        elif event.is_full():
-            messages.error(request, "Sorry, this event is full.")
-        else:
-            event.attendees.add(request.user)
-            try:
-                event.full_clean()  # Triggers model validation
-            except ValidationError as e:
-                event.attendees.remove(request.user)
-                messages.error(request, str(e))
-                logger.warning(f"RSVP validation failed for user {request.user.username} on event {event.title}: {str(e)}")
+            # 3. Perform our business logic checks AFTER the lock is acquired
+            if request.user in event.attendees.all():
+                messages.info(request, "You've already RSVPed to this event.")
+                
+            elif event.is_full():
+                messages.error(request, "Sorry, this event is full.")
+                
             else:
-                messages.success(request, "You have successfully RSVPed!")
-                logger.info(f"User {request.user.username} RSVPed to event {event.title}")
+                # 4. Safe to add the attendee
+                event.attendees.add(request.user)
+                
+                try:
+                    # Triggers model validation (checking capacity constraints on the model)
+                    event.full_clean() 
+                except ValidationError as e:
+                    # If model validation fails, we remove the user.
+                    # Because we are in an atomic block, this entire transaction will rollback anyway if it crashes,
+                    # but handling it gracefully here allows us to show a message.
+                    event.attendees.remove(request.user)
+                    messages.error(request, str(e))
+                    logger.warning(f"RSVP validation failed for user {request.user.username} on event {event.title}: {str(e)}")
+                else:
+                    messages.success(request, "You have successfully RSVPed!")
+                    logger.info(f"User {request.user.username} RSVPed to event {event.title}")
 
         return redirect('event_detail', pk=pk)
-    except Http404:
+        
+    except Event.DoesNotExist:
         logger.warning(f"Event with pk={pk} not found for RSVP")
-        raise
+        raise Http404("Event does not exist")
     except Exception as e:
         logger.error(f"Error in rsvp_event view for pk={pk}: {str(e)}")
         messages.error(request, "An error occurred while processing your RSVP. Please try again.")
