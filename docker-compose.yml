@@ -1,0 +1,15 @@
+
+
+services:
+  web:
+    build: .
+    # Map port 8000 on your laptop to port 8000 inside the container
+    ports:
+      - "8000:8000"
+    # Sync your local files with the container so you don't have to rebuild on every code change
+    volumes:
+      - .:/app
+    # Set dummy environment variables for local development
+    environment:
+      - DEBUG=True
+      - SECRET_KEY=your-local-dev-secret-key-123
