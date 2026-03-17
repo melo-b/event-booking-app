@@ -1,131 +1,63 @@
-# 🗓️ Event Booking App
-
-A Django-based web application that allows users to create events and RSVP to them. Includes search and filtering, capacity limits, admin tools, and RSVP confirmation logic.
-
+# 🗓️ Event Booking App API
 
 [![Django CI Pipeline](https://github.com/melo-b/event-booking-app/actions/workflows/django-ci.yml/badge.svg)](https://github.com/melo-b/event-booking-app/actions/workflows/django-ci.yml)
 
+A highly reliable, concurrency-safe event booking platform built with Django. 
 
----
-
-## 🚀 Features
-
-- ✅ User authentication (login, logout, registration)
-- ✅ Create, edit, delete events (CRUD)
-- ✅ RSVP to events with cancellation support
-- ✅ Prevent overbooking (model-level validation)
-- ✅ Search & filter by title, event type, and date
-- ✅ Pagination for event listings
-- ✅ Django admin customization
-- ✅ Email notifications for RSVPs (simulated)
-- ✅ Error handling with custom 404/500 pages
-- ✅ Responsive CSS styling
-- ✅ Comprehensive test coverage
-- ✅ Environment variable configuration
-- 🚫 Deployment not included in this version
+This project demonstrates how to build a production-ready backend that handles race conditions, enforces strict data integrity, and provides predictable API responses for frontend clients.
 
 ---
 
 ## 🛡️ Engineering Focus: Safety & Reliability
 
-Coming from a Product Safety Engineering background, my primary focus in backend development is risk mitigation, data integrity, and system reliability. This application implements several enterprise-level safety patterns:
+Coming from a Product Safety Engineering background in the TIC industry, my primary focus in software development is risk mitigation, fault tolerance, and system reliability. This application implements several enterprise-level safety patterns:
 
-* **Concurrency & Race Condition Prevention:** The RSVP booking engine utilizes database transactions (`transaction.atomic()`) and row-level locking (`select_for_update()`). This guarantees atomic operations and completely prevents double-booking race conditions when multiple users attempt to claim the final capacity slot simultaneously.
-* **Defense-in-Depth Data Integrity:** While application-level validation exists, strict data integrity is enforced at the database level. The PostgreSQL/SQLite schema utilizes `UniqueConstraint` on the RSVP model to mathematically guarantee a user can never possess duplicate tickets, regardless of how the data enters the system.
+### 1. Concurrency & Race Condition Prevention
+In an event booking system, the most critical failure point is the "Last Ticket" race condition. This application utilizes database transactions (`transaction.atomic()`) and row-level locking (`select_for_update()`). This guarantees atomic operations and completely prevents double-booking when multiple users attempt to claim the final capacity slot at the exact same millisecond.
 
----
+### 2. Defense-in-Depth Data Integrity
+While application-level validation exists in the views, strict data integrity is enforced at the database level. The schema utilizes a `UniqueConstraint` on the RSVP model to mathematically guarantee a user can never possess duplicate tickets, regardless of how the data enters the system (e.g., bypassing the UI via API or Admin panel).
 
-## 🔧 Tech Stack
+### 3. Predictable API Error Handling (Global Middleware)
+Unhandled server crashes (500 errors) typically return HTML tracebacks, which break frontend/mobile applications and leak system data. I implemented a **Global Exception Handling Middleware** that intercepts crashes, securely logs the full stack trace on the server, and returns a sanitized, standardized JSON response to the client with a traceable UUID:
 
-- Python 3.x
-- Django 5.2.1
-- SQLite (default, can be swapped)
-- HTML/CSS with custom styling
-- Python-decouple for environment variables
+```json
+{
+  "error": {
+    "code": "INTERNAL_SERVER_ERROR",
+    "message": "An unexpected system error occurred. Our engineering team has been notified.",
+    "reference_id": "8f4b2c9d1a3e47b29f8c7d6e5a4b3c2d"
+  }
+}
 
----
+🔧 Tech Stack & Architecture
+Framework: Python 3.11, Django 5.2
 
-## 📸 Screenshots
+Database: SQLite (Configured for easy swap to PostgreSQL in production)
 
-_(Add screenshots here later if you'd like)_
+Testing: Django TestCase (Automated suite proving concurrency limits and model constraints)
 
----
+CI/CD: GitHub Actions (Automated testing and linting on every push to main)
 
-## ⚙️ Getting Started (to see steps with code, to the last section at the bottom)
-
-### 1. Clone the repo 
-### 2. Create virtual environment
-### 3. Install dependencies
-### 4. Run migrations
-### 5. Create superuser
-### 6. Start development server
-
-
-## Testing the app
-Visit http://127.0.0.1:8000/
-
-Register or log in as a user
-
-Create and RSVP to events
-
-Try filtering, searching, and capacity limits
-
-## Admin Panel
-Visit: http://127.0.0.1:8000/admin/
-
-Log in using your superuser account
-
-Manage events and attendees
-
-## Running Tests
-```bash
-python manage.py test
-```
-
-The test suite includes:
-- Model tests (Event, RSVP, UserProfile)
-- View tests (CRUD operations, permissions, search/filtering)
-- Authentication tests
-- Capacity and RSVP functionality tests
-
-## Folder Structure
-event-booking-app/
-│
-├── events/              # App with models, views, URLs
-├── templates/           # HTML templates
-├── config/              # Project settings and URLs
-├── manage.py            # Django entry point
-├── requirements.txt     # Dependencies
-├── README.md            # Project documentation
-└── .gitignore           # Git ignored files
-
-## Contributing
-Contributions are welcomed! Fork the repo, make your changes, and submit a pull request.
+Infrastructure: Docker & Docker Compose for isolated, reproducible environments
 
 
-### Steps 1 to 6 See here
-```bash
-### git clone https://github.com/your-username/event-booking-app.git
-### cd event-booking-app
+🚀 Getting Started (Local Development)
+This project is fully containerized with Docker, eliminating "it works on my machine" environment issues.
+
+Prerequisites
+Docker Desktop installed and running.
+
+1-Click Setup
+Clone the repository and spin up the isolated container:
 
 
-### 2. Create virtual environment
-python -m venv venv
-source venv/bin/activate  # On Windows: venv\Scripts\activate
+git clone [https://github.com/melo-b/event-booking-app.git](https://github.com/melo-b/event-booking-app.git)
+cd event-booking-app
+docker-compose up --build
 
 
-### 3. Install dependencies
-pip install -r requirements.txt
+The application will be instantly available at http://localhost:8000.
 
-
-### 4. Run migrations
-python manage.py migrate
-
-
-### 5. Create a superuser
-python manage.py createsuperuser
-
-
-### 6. Start development server
-python manage.py runserver
-
+Note: The local database volume is mounted automatically. To run migrations or tests inside the container, use:
+docker-compose exec web python manage.py test
