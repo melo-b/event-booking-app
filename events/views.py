@@ -21,6 +21,7 @@ logger = logging.getLogger(__name__)
 
 def event_list(request):
     """Display list of upcoming events with search and filtering capabilities."""
+
     try:
         events = Event.objects.filter(date__gte=timezone.now()).order_by('date')
 
