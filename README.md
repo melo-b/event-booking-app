@@ -2,6 +2,10 @@
 
 A Django-based web application that allows users to create events and RSVP to them. Includes search and filtering, capacity limits, admin tools, and RSVP confirmation logic.
 
+
+[![Django CI Pipeline](https://github.com/melo-b/event-booking-app/actions/workflows/django-ci.yml/badge.svg)](https://github.com/melo-b/event-booking-app/actions/workflows/django-ci.yml)
+
+
 ---
 
 ## 🚀 Features
