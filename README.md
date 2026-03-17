@@ -22,6 +22,15 @@ A Django-based web application that allows users to create events and RSVP to th
 
 ---
 
+## 🛡️ Engineering Focus: Safety & Reliability
+
+Coming from a Product Safety Engineering background, my primary focus in backend development is risk mitigation, data integrity, and system reliability. This application implements several enterprise-level safety patterns:
+
+* **Concurrency & Race Condition Prevention:** The RSVP booking engine utilizes database transactions (`transaction.atomic()`) and row-level locking (`select_for_update()`). This guarantees atomic operations and completely prevents double-booking race conditions when multiple users attempt to claim the final capacity slot simultaneously.
+* **Defense-in-Depth Data Integrity:** While application-level validation exists, strict data integrity is enforced at the database level. The PostgreSQL/SQLite schema utilizes `UniqueConstraint` on the RSVP model to mathematically guarantee a user can never possess duplicate tickets, regardless of how the data enters the system.
+
+---
+
 ## 🔧 Tech Stack
 
 - Python 3.x
